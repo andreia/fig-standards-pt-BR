@@ -1,33 +1,35 @@
-PSR-2 Meta Document
-===================
+PSR-2 Meta Documento
+====================
 
-1. Summary
-----------
+1. Resumo
+---------
 
-The intent of this guide is to reduce cognitive friction when scanning code from different authors. It does so 
-by enumerating a shared set of rules and expectations about how to format PHP code.
+A intenção deste guia é reduzir a fricção cognitiva quando lendo códigos de
+diferentes autores. Isto é feito enumerando um conjunto de regras compartilhadas
+e expectativas de como formatar códigos em PHP.
 
-The style rules herein are derived from commonalities among the various member projects. When various authors 
-collaborate across multiple projects, it helps to have one set of guidelines to be used among all those 
-projects. Thus, the benefit of this guide is not in the rules themselves, but in the sharing of those rules.
+As regras de estilo incluídas aqui são derivadas de semelhanças entre vários
+projetos membros. Quando vários autores colaboram entre múltiplos projetos,
+ajuda ter um conjunto de princípios básicos à ser utilizado em todos os
+projetos. Assim, o benefício deste guia não está nas regras em sí, mas no
+compartilhamento destas regras.
 
 
-2. Votes
+2. Votos
 --------
 
-- **Acceptance Vote:** [ML](https://groups.google.com/d/msg/php-fig/c-QVvnZdMQ0/TdDMdzKFpdIJ)
+- **Votos de Aceitação:** [ML](https://groups.google.com/d/msg/php-fig/c-QVvnZdMQ0/TdDMdzKFpdIJ)
 
 
 3. Errata
 ---------
 
-### 3.1 - Multi-line Arguments (09/08/2013)
+1. _[09/08/2013]_ Utilizando um ou mais argumentos multi-linhas (ex: arrays ou
+funções anônimas) não constitui em dividir a lista de argumentos em sí, por
+isso, a seção 4.6 não é automaticamente aplicada. Arrays e funções anônimas
+conseguem atravessar múltiplas linhas.
 
-Using one or more multi-line arguments (i.e: arrays or anonymous functions) does not constitute 
-splitting the argument list itself, therefore Section 4.6 is not automatically enforced. Arrays and anonymous 
-functions are able to span multiple lines.
-
-The following examples are perfectly valid in PSR-2:
+Os exemplos a seguir são perfeitamente válidos na PSR-2:
 
 ```php
 <?php
@@ -35,13 +37,11 @@ somefunction($foo, $bar, [
   // ...
 ], $baz);
 
-$app->get('/hello/{name}', function ($name) use ($app) { 
-    return 'Hello '.$app->escape($name); 
+$app->get('/hello/{name}', function ($name) use ($app) {
+    return 'Hello '.$app->escape($name);
 });
 ```
 
-### 3.2 - Extending Multiple Interfaces (10/17/2013)
-
-When extending multiple interfaces, the list of `extends` should be treated the same as a list
-of `implements`, as declared in Section 4.1.
-
+2. _[10/17/2013]_ Quando extendendo múltiplas interfaces, a lista de `extends`
+deveria ser tratada do mesmo jeito que uma lista de`implements`, como declarado
+na seção 4.1.
