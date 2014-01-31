@@ -1,32 +1,26 @@
-Autoloading Standard
-====================
+Padrão de Autoload
+==================
 
-> **Deprecated** - As of 2014-10-21 PSR-0 has been marked as deprecated. [PSR-4] is now recommended 
-as an alternative.
+A seguir são descritos os requisitos obrigatórios que devem ser aderidos para
+permitir a interoperabilidade do autoloader.
 
-[PSR-4]: http://www.php-fig.org/psr/psr-4/
+Obrigatório
+-----------
 
-The following describes the mandatory requirements that must be adhered
-to for autoloader interoperability.
+* Os nomes completos de um namespace e sua classe devem ter a seguinte estrutura
+  `\<Vendor Name>\(<Namespace>\)*<Class Name>`
+* Cada namespace deve ter um namespace no nivel raíz ("Vendor Name").
+* Cada namespace pode ter quantos sub-namespaces forem necessários.
+* Cada separador de namespace é convertido para um `DIRECTORY_SEPARATOR` quando
+  carregando do sistema de arquivos.
+* Cada caractér `_` no CLASS NAME é convertido para um `DIRECTORY_SEPARATOR`.
+  O Caractér `_` não tem nenhum significado especial no namespace.
+* Os nomes completos de um namespace e sua classe recebem o sufixo `.php` quando
+  carregando do sistema de arquivos.
+* Caracteres nos nomes do vendor, dos namespaces e das classes podem ser
+  qualquer combinação de maiúsculas e minúsculas.
 
-Mandatory
----------
-
-* A fully-qualified namespace and class must have the following
-  structure `\<Vendor Name>\(<Namespace>\)*<Class Name>`
-* Each namespace must have a top-level namespace ("Vendor Name").
-* Each namespace can have as many sub-namespaces as it wishes.
-* Each namespace separator is converted to a `DIRECTORY_SEPARATOR` when
-  loading from the file system.
-* Each `_` character in the CLASS NAME is converted to a
-  `DIRECTORY_SEPARATOR`. The `_` character has no special meaning in the
-  namespace.
-* The fully-qualified namespace and class is suffixed with `.php` when
-  loading from the file system.
-* Alphabetic characters in vendor names, namespaces, and class names may
-  be of any combination of lower case and upper case.
-
-Examples
+Exemplos
 --------
 
 * `\Doctrine\Common\IsolatedClassLoader` => `/path/to/project/lib/vendor/Doctrine/Common/IsolatedClassLoader.php`
@@ -34,22 +28,22 @@ Examples
 * `\Zend\Acl` => `/path/to/project/lib/vendor/Zend/Acl.php`
 * `\Zend\Mail\Message` => `/path/to/project/lib/vendor/Zend/Mail/Message.php`
 
-Underscores in Namespaces and Class Names
------------------------------------------
+Underscores em nomes de Namespaces e Classes
+--------------------------------------------
 
 * `\namespace\package\Class_Name` => `/path/to/project/lib/vendor/namespace/package/Class/Name.php`
 * `\namespace\package_name\Class_Name` => `/path/to/project/lib/vendor/namespace/package_name/Class/Name.php`
 
-The standards we set here should be the lowest common denominator for
-painless autoloader interoperability. You can test that you are
-following these standards by utilizing this sample SplClassLoader
-implementation which is able to load PHP 5.3 classes.
+As padronizações que definimos aqui deveriam ser o mais baixo denominador comum
+para a interoperabilidade indolor do autoloader. Você pode testar se você está
+seguindo estes padrões utilizando esse exemplo de implementação de
+SplClassLoader que é capáz de carregar classes do PHP 5.3.
 
-Example Implementation
-----------------------
+Implementação de Exemplo
+------------------------
 
-Below is an example function to simply demonstrate how the above
-proposed standards are autoloaded.
+Abaixo está um exemplo de função para simplesmente demonstrar como os padrões
+propostos acima funcionam para o carregamento automático.
 
 ```php
 <?php
@@ -68,16 +62,15 @@ function autoload($className)
 
     require $fileName;
 }
-spl_autoload_register('autoload');
 ```
 
-SplClassLoader Implementation
------------------------------
+Implementação do SplClassLoader
+-------------------------------
 
-The following gist is a sample SplClassLoader implementation that can
-load your classes if you follow the autoloader interoperability
-standards proposed above. It is the current recommended way to load PHP
-5.3 classes that follow these standards.
+O gist a seguir é uma amostra de implementação do SplClassLoader que pode
+carregar suas classes se você segue os padrões de interoperabilidade de
+autoloader propostos acima. Atualmente é a maneira recomendada para carregar
+classes do PHP 5.3 que seguem estes padrões.
 
 * [http://gist.github.com/221634](http://gist.github.com/221634)
 
