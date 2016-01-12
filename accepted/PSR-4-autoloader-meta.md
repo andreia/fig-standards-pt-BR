@@ -1,24 +1,24 @@
-PSR-4 Meta Document
-===================
+PSR-4 Documento Meta
+====================
 
-1. Summary
+1. Sumário
 ----------
 
-The purpose is to specify the rules for an interoperable PHP autoloader that
-maps namespaces to file system paths, and that can co-exist with any other SPL
-registered autoloader.  This would be an addition to, not a replacement for,
+O objetivo consiste em especificar as regras para um autoloader PHP interoperável que
+mapeia namespaces para caminhos de arquivo do sistema, e que pode coexistir com qualquer outro
+autoloader SPL registrado. Seria um complemento e não um substituto para o
 PSR-0.
 
-2. Why Bother?
---------------
+2. Por que se preocupar?
+------------------------
 
-### History of PSR-0
+### História do PSR-0
 
-The PSR-0 class naming and autoloading standard rose out of the broad
-acceptance of the Horde/PEAR convention under the constraints of PHP 5.2 and
-previous. With that convention, the tendency was to put all PHP source classes
-in a single main directory, using underscores in the class name to indicate
-pseudo-namespaces, like so:
+O padrão PSR-0 para nomenclatura de classes e para autoloading surgiu da ampla
+aceitação da convenção Horde/PEAR sob as limitações do PHP 5.2 e
+anteriores. Com essa convenção, a tendência foi colocar todas as classes fonte PHP
+em um único diretório principal, usando sublinhados (underscores) no nome da classe para indicar
+pseudo-namespaces, dessa forma:
 
     /path/to/src/
         VendorFoo/
@@ -28,11 +28,11 @@ pseudo-namespaces, like so:
             Zim/
                 Gir.php     # Vendor_Dib_Zim_Gir
 
-With the release of PHP 5.3 and the availability of namespaces proper, PSR-0
-was introduced to allow both the old Horde/PEAR underscore mode *and* the use
-of the new namespace notation. Underscores were still allowed in the class
-name to ease transition from the older namespace naming to the newer naming,
-and thereby to encourage wider adoption.
+Com o lançamento do PHP 5.3 e a disponibilidade de namespaces adequados, o PSR-0
+foi introduzido para permitir tanto o modo sublinhado Horde/PEAR antigo *e* o uso
+da nova notação namespace. Sublinhados ainda eram permitidos no nome da classe
+para facilitar a transição da antiga nomenclatura de namespace para a mais recente,
+e, assim, incentivar a adoção mais ampla.
 
     /path/to/src/
         VendorFoo/
@@ -46,19 +46,19 @@ and thereby to encourage wider adoption.
                 V1.php
                 V2.php      # Irk_Operation\Impending_Doom\V2
 
-This structure is informed very much by the fact that the PEAR installer moved
-source files from PEAR packages into a single central directory.
+Essa estrutura é formada muito pelo fato de que o instalador PEAR movia
+os arquivos fonte de pacotes PEAR para um único diretório central.
 
-### Along Comes Composer
+### Então surge o Composer
 
-With Composer, package sources are no longer copied to a single global
-location. They are used from their installed location and are not moved
-around. This means that with Composer there is no "single main directory" for
-PHP sources as with PEAR. Instead, there are multiple directories; each
-package is in a separate directory for each project.
+Com o Composer, o código fonte dos pacotes não é mais copiado para uma única localização
+global. Eles são utilizados a partir de sua localização instalada e não são
+movidos. Isso significa que com o Composer não há um "único diretório principal" para
+os fontes PHP como acontecia com o PEAR. Em vez disso, existem vários diretórios; cada
+pacote está em um diretório separado para cada projeto.
 
-To meet the requirements of PSR-0, this leads to Composer packages looking
-like this:
+Para satisfazer as exigências do PSR-0, os pacotes do Composer
+pareçam com o seguinte:
 
     vendor/
         vendor_name/
@@ -72,12 +72,12 @@ like this:
                         Package_Name/
                             ClassNameTest.php   # Vendor_Name\Package_Name\ClassNameTest
 
-The "src" and "tests" directories have to include vendor and package directory
-names. This is an artifact of PSR-0 compliance.
+Os diretórios "src" e "tests" têm que incluir nomes de diretórios vendor e
+package. Esse é um artefato de cumprimento do PSR-0.
 
-Many find this structure to be deeper and more-repetitive than necessary. This
-proposal suggests that an additional or superseding PSR would be useful so
-that we can have packages that look more like the following:
+Muitos acham essa estrutura mais profunda e repetitiva do que o necessário. Essa
+proposta sugere que um PSR adicional ou substituto seria útil para
+termos pacotes semelhantes ao seguinte:
 
     vendor/
         vendor_name/
@@ -87,195 +87,195 @@ that we can have packages that look more like the following:
                 tests/
                     ClassNameTest.php   # Vendor_Name\Package_Name\ClassNameTest
 
-This would require an implementation of what was initially called
-"package-oriented autoloading" (as vs the traditional "direct class-to-file
-autoloading").
+Isso exigiria uma implementação do que foi chamado inicialmente
+"autoloading orientado a pacote" (vs o tradicional "autoloading direto
+classe-para-arquivo").
 
-### Package-Oriented Autoloading
+### Autoloading Orientado a Pacote
 
-It's difficult to implement package-oriented autoloading via an extension or
-amendment to PSR-0, because PSR-0 does not allow for an intercessory path
-between any portions of the class name. This means the implementation of a
-package-oriented autoloader would be more complicated than PSR-0. However, it
-would allow for cleaner packages.
+É difícil implementar o autoloading orientado a pacote através de uma extensão ou
+alteração no PSR-0, porque o PSR-0 não permite um caminho de intercessão
+entre quaisquer partes do nome da classe. Isso significa que a implementação de um
+autoloader orientado a pacote seria mais complicado do que o PSR-0. Entretanto, ele
+permitiria pacotes mais limpos.
 
-Initially, the following rules were suggested:
+Inicialmente, foram sugeridas as seguintes regras:
 
-1. Implementors MUST use at least two namespace levels: a vendor name, and
-package name within that vendor. (This top-level two-name combination is
-hereinafter referred to as the vendor-package name or the vendor-package
-namespace.)
+1. Os implementadores DEVEM usar pelo menos dois níveis de namespace: nome do vendor, e
+nome do pacote dentro desse vendor. (Esta combinação de dois nomes de nível superior é
+a seguir designada como o nome do vendor-package ou o namespace do
+vendor-package.)
 
-2. Implementors MUST allow a path infix between the vendor-package namespace
-and the remainder of the fully qualified class name.
+2. Os implementadores DEVEM permitir um caminho infixo entre o namespace vendor-package
+e o restante do nome de classe totalmente qualificado.
 
-3. The vendor-package namespace MAY map to any directory. The remaining
-portion of the fully-qualified class name MUST map the namespace names to
-identically-named directories, and MUST map the class name to an
-identically-named file ending in .php.
+3. O namespace vendor-package PODE mapear para qualquer diretório. A parte
+restante do nome de classe totalmente qualificado DEVE mapear os nomes de namespaces
+para diretórios identicamente nomeados e DEVE mapear o nome da classe para um
+arquivo identicamente nomeado que termina em .php.
 
-Note that this means the end of underscore-as-directory-separator in the class
-name. One might think underscores should be honored as they are under
-PSR-0, but seeing as their presence in that document is in reference to
-transitioning away from PHP 5.2 and previous pseudo-namespacing, it is
-acceptable to remove them here as well.
-
-
-3. Scope
---------
-
-### 3.1 Goals
-
-- Retain the PSR-0 rule that implementors MUST use at least two namespace
-  levels: a vendor name, and package name within that vendor.
-
-- Allow a path infix between the vendor-package namespace and the remainder of
-  the fully qualified class name.
-
-- Allow the vendor-package namespace MAY map to any directory, perhaps
-  multiple directories.
-
-- End the honoring of underscores in class names as directory separators
-
-### 3.2 Non-Goals
-
-- Provide a general transformation algorithm for non-class resources
+Note que isso significa o fim do sublinhado-como-separador-de-diretório no nome da
+classe. Pode-se pensar que os sublinhados devem ser honrados pois eles estão sob
+o PSR-0, mas vendo que a sua presença no documento é em referência a
+transição do PHP 5.2 e de pseudo-namespacing anteriores, é
+aceitável removê-los aqui.
 
 
-4. Approaches
+3. Escopo
+---------
+
+### 3.1 Metas
+
+- Manter a regra PSR-0 que implementadores DEVEM usar pelo menos dois níveis de
+  namespaces: nome do vendor e nome do pacote dentro desse vendor.
+
+- Permitir um caminho infixo entre o namespace vendor-package e o restante do
+  nome de classe totalmente qualificado.
+
+- Permitir que o namespace vendor-package POSSA mapear para qualquer diretório, talvez
+  vários diretórios.
+
+- Acabar com os sublinhados em nomes de classe como separadores de diretório
+
+### 3.2 Não-Metas
+
+- Proporcionar um algoritmo de transformação geral para recursos não-classe
+
+
+4. Abordagens
 -------------
 
-### 4.1 Chosen Approach
+### 4.1 Abordagem Escolhida
 
-This approach retains key characteristics of PSR-0 while eliminating the
-deeper directory structures it requires. In addition, it specifies certain
-additional rules that make implementations explicitly more interoperable.
+Esta abordagem mantém características-chave do PSR-0, eliminando as
+estruturas de diretórios mais profundas que ele exige. Além disso, ela especifica determinadas
+regras adicionais que fazem as implementações explicitamente mais interoperáveis.
 
-Although not related to directory mapping, the final draft also specifies how
-autoloaders should handle errors.  Specifically, it forbids throwing exceptions
-or raising errors.  The reason is two-fold.
+Apesar de não ser relacionada ao mapeamento de diretório, a versão final também especifica como
+os autoloaders deve lidar com erros. Especificamente, ela proíbe lançar exceções
+ou gerar erros. A razão é dupla.
 
-1. Autoloaders in PHP are explicitly designed to be stackable so that if one
-autoloader cannot load a class another has a chance to do so. Having an autoloader
-trigger a breaking error condition violates that compatibility.
+1. Autoloaders em PHP são explicitamente projetados para serem empilháveis ​​de modo que, se um
+autoloader não consegue carregar uma classe, outro tem a chance de fazê-lo. Ter um autoloader
+que aciona uma condição de quebra de erro viola a compatibilidade.
 
-2. `class_exists()` and `interface_exists()` allow "not found, even after trying to
-autoload" as a legitimate, normal use case. An autoloader that throws exceptions
-renders `class_exists()` unusable, which is entirely unacceptable from an interoperability
-standpoint.  Autoloaders that wish to provide additional debugging information
-in a class-not-found case should do so via logging instead, either to a PSR-3
-compatible logger or otherwise.
+2. `class_exists()` e `interface_exists()` permitem "não encontrado, mesmo depois de tentar
+o autoload" como um caso de uso normal e legítimo. Um autoloader que gera exceções
+torna `class_exists()` inutilizável, o que é totalmente inaceitável no ponto de vista da
+interoperabilidade. Os autoloaders que desejam fornecer informações de depuração adicional
+em um caso classe-não-encontrada devem fazê-lo através de log, seja para um logger compatível com o PSR-3
+ou outro.
 
-Pros:
+Prós:
 
-- Shallower directory structures
+- Estruturas de diretórios rasas
 
-- More flexible file locations
+- Localizações de arquivos mais flexíveis
 
-- Stops underscore in class name from being honored as directory separator
+- Parar de usar o sublinhado no nome da classe como separador de diretório
 
-- Makes implementations more explicitly interoperable
+- Tornar as implementações mais explicitamente interoperáveis
 
-Cons:
+Contras:
 
-- It is no longer possible, as under PSR-0, to merely examine a class name to
-  determine where it is in the file system (the "class-to-file" convention
-  inherited from Horde/PEAR).
-
-
-### 4.2 Alternative: Stay With PSR-0 Only
-
-Staying with PSR-0 only, although reasonable, does leave us with relatively
-deeper directory structures.
-
-Pros:
-
-- No need to change anyone's habits or implementations
-
-Cons:
-
-- Leaves us with deeper directory structures
-
-- Leaves us with underscores in the class name being honored as directory
-  separators
+- Não é mais possível, como sob o PSR-0, examinar apenas um nome de classe para
+  determinar onde ele está no sistema de arquivos (a convenção "classe-para-arquivo"
+  herdada do Horde/PEAR).
 
 
-### 4.3 Alternative: Split Up Autoloading And Transformation
+### 4.2 Alternativa: Ficar Somente Com o PSR-0
 
-Beau Simensen and others suggested that the transformation algorithm might be
-split out from the autoloading proposal, so that the transformation rules
-could be referenced by other proposals. After doing the work to separate them,
-followed by a poll and some discussion, the combined version (i.e.,
-transformation rules embedded in the autoloader proposal) was revealed as the
-preference.
+Ficar apenas com o PSR-0, embora razoável, nos deixa com uma estrutura de
+diretórios relativamente mais profunda.
 
-Pros:
+Prós:
 
-- Transformation rules could be referenced separately by other proposal
+- Não há necessidade de mudar os hábitos ou implementações de ninguém
 
-Cons:
+Contras:
 
-- Not in line with the wishes of poll respondents and some collaborators
+- Deixa-nos com estruturas de diretórios mais profundas
 
-### 4.4 Alternative: Use More Imperative And Narrative Language
-
-After the second vote was pulled by a Sponsor after hearing from multiple +1 
-voters that they supported the idea but did not agree with (or understand) the 
-wording of the proposal, there was a period during which the voted-on proposal
-was expanded with greater narrative and somewhat more imperative language. This
-approach was decried by a vocal minority of participants. After some time, Beau
-Simensen started an experimental revision with an eye to PSR-0; the Editor and
-Sponsors favored this more terse approach and shepherded the version now under
-consideration, written by Paul M. Jones and contributed to by many.
-
-### Compatibility Note with PHP 5.3.2 and below
-
-PHP versions before 5.3.3 do not strip the leading namespace separator, so 
-the responsibility to look out for this falls on the implementation. Failing 
-to strip the leading namespace separator could lead to unexpected behavior. 
+- Deixa-nos com sublinhados no nome da classe usados como separadores de
+  diretório
 
 
-5. People
----------
+### 4.3 Alternativa: Dividir Autoloading e Transformação
+
+Beau Simensen e outros sugeriram que o algoritmo de transformação pode ser
+dividido da proposta de autoloading, de modo que as regras de transformação
+poderiam ser referenciadas por outras propostas. Depois de fazer o trabalho para separá-las,
+seguido por uma votação e alguma discussão, a versão combinada (ou seja,
+regras de transformação incorporadas na proposta de autoloader) foi revelada como a
+preferência.
+
+Prós:
+
+- Regras de transformação poderiam ser referenciadas separadamente por outra proposta
+
+Contras:
+
+- Não está de acordo com os desejos dos que responderam a pesquisa e alguns colaboradores
+
+### 4.4 Alternativa: Usar uma Linguagem mais Imperativa e Narrativa
+
+Após a segunda votação ser puxada por um patrocinador após ouvir um múltiplo +1
+dos eleitores que apoiaram a idéia, mas não concordavam (ou entenderam) com a
+formulação da proposta, houve um período em que a proposta votada
+foi ampliada com mais narrativa e uma linguagem um pouco mais imperativa. Essa
+abordagem foi criticada por uma minoria dos participantes. Depois de algum tempo, Beau
+Simensen iniciou uma revisão experimental com um olho no PSR-0; o Editor e
+os Patrocinadores favoreceram essa abordagem mais concisa e conduziu a versão agora sob
+consideração, escrita por Paul M. Jones e com a contribuição de muitos.
+
+### Nota de Compatibilidade com o PHP 5.3.2 e anteriores
+
+Versões do PHP anteriores a 5.3.3 não tiram o separador de namespace principal, assim
+a responsabilidade de verificar por essa diferença cai sobre a implementação. A não
+retirada do separator de namespace principal pode levar a um comportamento inesperado.
+
+
+5. Pessoas
+----------
 
 ### 5.1 Editor
 
 - Paul M. Jones, Solar/Aura
 
-### 5.2 Sponsors
+### 5.2 Patrocinadores
 
-- Phil Sturgeon, PyroCMS (Coordinator)
+- Phil Sturgeon, PyroCMS (Coordenador)
 - Larry Garfield, Drupal
 
-### 5.3 Contributors
+### 5.3 Contribuintes
 
 - Andreas Hennings
 - Bernhard Schussek
 - Beau Simensen
-- Donald Gilbert 
+- Donald Gilbert
 - Mike van Riel
 - Paul Dragoonis
-- Too many others to name and count
+- Muitos outros para nomear e contar
 
 
-6. Votes
+6. Votos
 --------
 
-- **Entrance Vote:** <https://groups.google.com/d/msg/php-fig/_LYBgfcEoFE/ZwFTvVTIl4AJ>
+- **Voto de Entrada:** <https://groups.google.com/d/msg/php-fig/_LYBgfcEoFE/ZwFTvVTIl4AJ>
 
-- **Acceptance Vote:**
+- **Voto de Aceitação:**
 
-    - 1st attempt: <https://groups.google.com/forum/#!topic/php-fig/Ua46E344_Ls>,
-      presented prior to new workflow; aborted due to accidental proposal modification
+    - 1ª tentativa: <https://groups.google.com/forum/#!topic/php-fig/Ua46E344_Ls>,
+      apresentada antes do novo fluxo de trabalho; abortada devido à modificação acidental da proposta
       
-    - 2nd attempt: <https://groups.google.com/forum/#!topic/php-fig/NWfyAeF7Psk>,
-      cancelled at the discretion of the sponsor <https://groups.google.com/forum/#!topic/php-fig/t4mW2TQF7iE>
+    - 2ª tentativa: <https://groups.google.com/forum/#!topic/php-fig/NWfyAeF7Psk>,
+      cancelada a critério do patrocinador <https://groups.google.com/forum/#!topic/php-fig/t4mW2TQF7iE>
     
-    - 3rd attempt: TBD
+    - 3ª tentativa: TBD
 
 
-7. Relevant Links
------------------
+7. Links relevantes
+-------------------
 
 - [Autoloader, round 4](https://groups.google.com/forum/#!topicsearchin/php-fig/autoload/php-fig/lpmJcmkNYjM)
 - [POLL: Autoloader: Split or Combined?](https://groups.google.com/forum/#!topicsearchin/php-fig/autoload/php-fig/fGwA6XHlYhI)
